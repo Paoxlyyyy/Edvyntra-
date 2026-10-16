@@ -1,0 +1,6 @@
+{
+  "name": "EDVYNTRA",
+  "description": "Plataforma educativa con Inteligencia Artificial para estudiantes de 12 a 18 años: tutor personalizado, escáner de ejercicios y práctica adaptativa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
