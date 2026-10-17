@@ -24,7 +24,7 @@ export function getApiBaseUrl(): string {
       (origin.includes('localhost') && !origin.includes(':3000'))
     ) {
       // Use configured production/dev cloud run host if in mobile build
-      return 'https://ais-dev-ynrust2r4sn4hicl7qm35i-313288799017.us-west2.run.app';
+      return'https://edvyntra-1.onrender.com';
     }
   }
 
