@@ -6,29 +6,24 @@
 
 // Determine backend API base URL
 export function getApiBaseUrl(): string {
-  // 1. If explicit environment variable is set
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.replace(/\/$/, '');
   }
 
-  // 2. Check if running in an Android WebView (Capacitor / Cordova / file://)
   if (typeof window !== 'undefined') {
     const origin = window.location.origin;
     const protocol = window.location.protocol;
 
-    // In native Android WebView, origin may be capacitor://localhost or file:// or localhost without port 3000
     if (
       protocol === 'file:' ||
       origin.startsWith('capacitor://') ||
       origin.startsWith('ionic://') ||
       (origin.includes('localhost') && !origin.includes(':3000'))
     ) {
-      // Use configured production/dev cloud run host if in mobile build
-      return'https://edvyntra-1.onrender.com';
+      return 'https://edvyntra-1.onrender.com';
     }
   }
 
-  // 3. Default relative origin for web
   return '';
 }
 
@@ -41,7 +36,7 @@ export async function apiRequest<T = any>(
   const fullUrl = `${baseUrl}${cleanEndpoint}`;
 
   const headers: Record<string, string> = {
-    'Accept': 'application/json',
+    Accept: 'application/json',
     ...(options.headers as Record<string, string> || {})
   };
 
@@ -49,11 +44,12 @@ export async function apiRequest<T = any>(
     headers['Content-Type'] = 'application/json';
   }
 
+  // The public Render API does not use browser session cookies. Sending
+  // credentials with Access-Control-Allow-Origin: * causes CORS to fail.
   const fetchOptions: RequestInit = {
     ...options,
     headers,
-    // credentials: 'include' is essential for cookies/session in iframes and cross-site contexts
-    credentials: options.credentials || 'include',
+    credentials: options.credentials || (baseUrl ? 'omit' : 'same-origin'),
   };
 
   let response: Response;
@@ -66,12 +62,10 @@ export async function apiRequest<T = any>(
 
   const contentType = response.headers.get('content-type') || '';
 
-  // Check if response is HTML instead of expected JSON (e.g., auth redirect or 502/503 HTML gateway page)
   if (contentType.includes('text/html')) {
     const htmlText = await response.text();
     console.warn(`Received HTML response from ${endpoint} (status ${response.status}):`, htmlText.slice(0, 200));
 
-    // Detect cookie check redirect
     if (htmlText.includes('__cookie_check') || htmlText.includes('302 Found')) {
       throw new Error('La sesión de conexión requiere actualización de cookies. Por favor recarga la página.');
     }
@@ -79,7 +73,6 @@ export async function apiRequest<T = any>(
     throw new Error(`El servidor respondió con página HTML (código ${response.status}) en lugar de datos JSON.`);
   }
 
-  // Parse JSON safely
   let data: any;
   try {
     data = await response.json();
