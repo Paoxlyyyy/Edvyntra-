@@ -1,0 +1,8 @@
+{
+  "appId": "com.edvyntra.app",
+  "appName": "EDVYNTRA",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
